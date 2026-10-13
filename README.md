@@ -8,6 +8,35 @@ An example AI news filtering project with user-configurable sources and personal
 >
 > This Public Repository **does not include any built-in news sources**. `config/feeds.json` is an empty array by default, so the project does not access any third-party website unless the user adds a source. Before adding, enabling, or running a source, users must verify authorization and compliance requirements and accept responsibility for their use.
 
+## 主要功能
+
+### Key features
+
+- 僅接受具有可驗證發布時間且位於最近 24 小時內的內容。<br>
+  Accepts only content with a verifiable publication timestamp within the previous 24 hours.
+- 先以來源中立的本地規則評分、去重與限制候選數量，再呼叫 Gemini。<br>
+  Applies source-neutral local scoring, deduplication, and candidate limits before calling Gemini.
+- 由 Gemini 進行個人相關性判斷，並產生中文在前、英文在後的雙語摘要。<br>
+  Uses Gemini for personalized relevance evaluation and bilingual summaries with Chinese first and English second.
+- 使用 LINE Push API 個別傳送給一個以上的 Secret-configured recipients。<br>
+  Delivers individually to one or more secret-configured recipients through the LINE Push API.
+- 內建保守 Rate Limit、`Retry-After`、`robots.txt` 檢查、錯誤隔離與隱私導向紀錄。<br>
+  Includes conservative rate limits, `Retry-After`, `robots.txt` checks, failure isolation, and privacy-conscious records.
+
+## 技術棧
+
+### Technology stack
+
+| 類型 / Area | 技術 / Technology |
+|---|---|
+| Runtime | Node.js 20+ |
+| Language | TypeScript 5 |
+| Parsing | `fast-xml-parser` |
+| AI | Gemini API |
+| Delivery | LINE Messaging API — Push API |
+| Testing | Vitest |
+| Automation | GitHub Actions |
+
 ## 為什麼不提供預設來源
 
 ### Why no default sources are included
@@ -39,6 +68,19 @@ Gemini relevance evaluation and bilingual summarization
         ↓
 LINE Push API
 ```
+
+## 關鍵技術決策
+
+### Key technical decisions
+
+- Public 版本以空來源設定發布，避免替使用者選擇或背書第三方來源。<br>
+  The Public version ships with an empty source configuration to avoid selecting or endorsing third-party sources for users.
+- 發布時間、存取政策或必要設定無法驗證時採 fail closed，不猜測、不繞過限制。<br>
+  The system fails closed when publication time, access policy, or required configuration cannot be verified; it does not guess or bypass restrictions.
+- 本地規則負責低成本縮小候選，Gemini 只處理受限批次，控制免費額度與延遲。<br>
+  Local rules reduce the candidate set at low cost, while Gemini processes only a bounded batch to control free-tier usage and latency.
+- Public repository 由 Private source of truth 單向安全匯出；production state、來源與 Secrets 不反向或向外同步。<br>
+  The Public repository is generated one way from a Private source of truth; production state, sources, and secrets are never synchronized outward or back automatically.
 
 ## 使用原則與使用者責任
 
@@ -221,6 +263,17 @@ Do not publish LINE user IDs. Even hashes or aliases can become long-term linkab
 除非 repository 中另有正式 `LICENSE` 文件，Public 可見不代表授予複製、修改、散布或商業使用權。Repository 擁有者應在發布前自行選擇並審閱適合的 License；第三方來源內容不會因本專案的 License 而取得額外授權。
 
 Unless the repository includes a formal `LICENSE` file, public visibility does not grant permission to copy, modify, distribute, or use the project commercially. The repository owner should independently select and review an appropriate License before release. Third-party source content does not gain additional permissions from this project's License.
+
+## Repository 政策
+
+### Repository policies
+
+- 安全回報方式請參閱 [`SECURITY.md`](SECURITY.md)。<br>
+  See [`SECURITY.md`](SECURITY.md) for private vulnerability reporting instructions.
+- 開發設定、修改原則與 Public mirror 貢獻流程請參閱 [`CONTRIBUTING.md`](CONTRIBUTING.md)。<br>
+  See [`CONTRIBUTING.md`](CONTRIBUTING.md) for development setup, change guidelines, and the Public mirror contribution flow.
+- 本 repository 目前沒有 `LICENSE`；在 License 決策完成前，不應假設取得重用權。<br>
+  This repository currently has no `LICENSE`; do not assume reuse rights until a license decision is completed.
 
 ## 已知限制
 
