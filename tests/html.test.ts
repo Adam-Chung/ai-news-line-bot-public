@@ -4,8 +4,13 @@ import { plainTextFromHtml } from "../src/html.js";
 describe("plainTextFromHtml", () => {
   it("removes script and style elements whose closing tags contain whitespace", () => {
     expect(plainTextFromHtml(
-      "<p>Visible</p><script>hidden()</script ><style>.hidden{}</style >"
+      "<p>Visible</p><script>hidden()</script\t\n ignored><style>.hidden{}</style >"
     )).toBe("Visible");
+  });
+
+  it("drops the remainder after an unclosed raw-text element", () => {
+    expect(plainTextFromHtml("Visible<script>Submitted on 31 May 2026"))
+      .toBe("Visible");
   });
 
   it("decodes nested HTML entities only once", () => {
