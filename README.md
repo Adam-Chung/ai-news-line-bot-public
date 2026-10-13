@@ -1,8 +1,8 @@
 # AI News LINE Bot
 
-一個可自行設定來源與個人偏好的 AI 新聞篩選範例專案。系統可讀取使用者自行加入的 RSS、Atom、sitemap 或支援的 API，先以本地規則篩選，再交由 Gemini 產生繁體中文摘要，最後以 LINE Push API 傳送給指定收件者。
+一個可自行設定來源與個人偏好的 AI 新聞篩選範例專案。系統可讀取使用者自行加入的 RSS、Atom、sitemap 或支援的 API，先以本地規則篩選，再交由 Gemini 產生繁體中文與英文摘要，最後以 LINE Push API 傳送給指定收件者。
 
-An example AI news filtering project with user-configurable sources and personal preferences. It reads RSS, Atom, sitemap, or supported API sources added by the user, applies local filtering rules, asks Gemini to generate Traditional Chinese summaries, and delivers the results to specified recipients through the LINE Push API.
+An example AI news filtering project with user-configurable sources and personal preferences. It reads RSS, Atom, sitemap, or supported API sources added by the user, applies local filtering rules, asks Gemini to generate Traditional Chinese and English summaries, and delivers the results to specified recipients through the LINE Push API.
 
 > 本 Public Repository **不內建任何新聞來源**。`config/feeds.json` 預設為空陣列，不會主動存取任何第三方網站。使用者加入、啟用及運行來源前，必須自行完成授權與合規確認並承擔相應責任。
 >
@@ -34,8 +34,8 @@ Publication-time and URL validation
 本地內容評分、去重與候選限制
 Local content scoring, deduplication, and candidate limits
         ↓
-Gemini 相關性判斷與摘要
-Gemini relevance evaluation and summarization
+Gemini 相關性判斷與中英摘要
+Gemini relevance evaluation and bilingual summarization
         ↓
 LINE Push API
 ```

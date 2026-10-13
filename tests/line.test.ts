@@ -14,7 +14,8 @@ describe("formatLineMessage", () => {
     })];
     const digest: CuratedDigest = { items: [{
       candidateId: "abc", relevanceScore: 90, category: "AI 新概念", title: "Context Engineering",
-      summary: "摘要", whyImportant: "與可靠 AI 系統有關", conceptExplanation: "設計模型執行時取得的完整脈絡。"
+      summaryZh: "這是繁體中文摘要。", summaryEn: "This is the English summary.",
+      whyImportant: "與可靠 AI 系統有關", conceptExplanation: "設計模型執行時取得的完整脈絡。"
     }], decisions: [] };
 
     const result = formatLineMessage(
@@ -26,6 +27,9 @@ describe("formatLineMessage", () => {
 
     expect(result).toContain("測試使用者 的今日 AI 情報");
     expect(result).toContain("Context Engineering");
+    expect(result).toContain("這是繁體中文摘要。\n\nThis is the English summary.");
+    expect(result.indexOf("這是繁體中文摘要。"))
+      .toBeLessThan(result.indexOf("This is the English summary."));
     expect(result).toContain("資料性質：官方發布");
     expect(result).toContain("來源：Test");
     expect(result).toContain("🔗 https://example.com/news");
@@ -49,7 +53,8 @@ describe("formatLineMessage", () => {
         relevanceScore: 90,
         category: "開發工具",
         title: "AI 工具",
-        summary: "摘要",
+        summaryZh: "繁體中文摘要。",
+        summaryEn: "English summary.",
         whyImportant: "與 AI 開發有關",
         conceptExplanation: null
       }],
@@ -107,7 +112,8 @@ describe("formatLineMessage", () => {
         relevanceScore: 80,
         category: "重要新聞",
         title: "媒體報導",
-        summary: "摘要",
+        summaryZh: "繁體中文摘要。",
+        summaryEn: "English summary.",
         whyImportant: "提供在地觀點",
         conceptExplanation: null
       }],

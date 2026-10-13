@@ -98,7 +98,8 @@ export interface CuratedItem {
   relevanceScore: number;
   category: "重要新聞" | "AI 新概念" | "AI 名詞" | "開發工具";
   title: string;
-  summary: string;
+  summaryZh: string;
+  summaryEn: string;
   whyImportant: string;
   conceptExplanation: string | null;
 }

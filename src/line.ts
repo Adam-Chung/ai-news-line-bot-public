@@ -31,7 +31,7 @@ export function formatLineMessage(
     const primaryLink = candidate.discussionUrl
       ? `🔗 原文：${candidate.url}`
       : `🔗 ${candidate.url}`;
-    return [`${index + 1}.【${item.category}】${item.title}\n${item.summary}\n\n📌 資料性質：${evidenceLabel(candidate)}\n📰 來源：${candidate.source}\n\n🎯 為什麼對你重要\n${item.whyImportant}${concept}\n\n${primaryLink}${discussion}`];
+    return [`${index + 1}.【${item.category}】${item.title}\n${item.summaryZh.trim()}\n\n${item.summaryEn.trim()}\n\n📌 資料性質：${evidenceLabel(candidate)}\n📰 來源：${candidate.source}\n\n🎯 為什麼對你重要\n${item.whyImportant}${concept}\n\n${primaryLink}${discussion}`];
   });
   return `🤖 ${displayName} 的今日 AI 情報｜${date}\n\n${sections.join("\n\n──────────\n\n")}`;
 }

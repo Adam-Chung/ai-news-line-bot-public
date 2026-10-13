@@ -26,8 +26,10 @@ function buildPrompt(profile: Profile, candidates: NewsCandidate[]): string {
 - selected=true 的 candidateId 必須同時出現在 items；未達 75 分者 selected 必須為 false
 - 來源名氣、品牌或文章發布時間早晚不得影響相關性評分
 - 不得加入候選資料以外的新聞或 URL
-- 使用台灣繁體中文，內容務實、避免炒作
-- summary 2 到 3 句；whyImportant 必須具體連結個人背景
+- category、title、whyImportant 與 conceptExplanation 使用台灣繁體中文，內容務實、避免炒作
+- summaryZh 使用台灣繁體中文寫成單一段落，共 2 到 3 句
+- summaryEn 使用英文忠實翻譯 summaryZh，寫成單一段落，共 2 到 3 句；必須保留原本的不確定性與來源歸屬，不得新增事實
+- whyImportant 必須具體連結個人背景
 - 有值得學習的新名詞時才填 conceptExplanation，否則為 null
 - evidenceStatus 只控制表述方式，不是相關性加分：
   - primary / linked-primary / corroborated 可陳述為已確認資訊
@@ -52,7 +54,10 @@ function isCuratedItem(value: unknown, candidateIds: Set<string>): value is Cura
     && item.relevanceScore >= 75
     && typeof item.category === "string"
     && typeof item.title === "string"
-    && typeof item.summary === "string"
+    && typeof item.summaryZh === "string"
+    && item.summaryZh.trim().length > 0
+    && typeof item.summaryEn === "string"
+    && item.summaryEn.trim().length > 0
     && typeof item.whyImportant === "string"
     && (typeof item.conceptExplanation === "string" || item.conceptExplanation === null);
 }
@@ -150,13 +155,14 @@ export async function curateWithGemini(
               maxItems: 2,
               items: {
                 type: "object",
-                required: ["candidateId", "relevanceScore", "category", "title", "summary", "whyImportant", "conceptExplanation"],
+                required: ["candidateId", "relevanceScore", "category", "title", "summaryZh", "summaryEn", "whyImportant", "conceptExplanation"],
                 properties: {
                   candidateId: { type: "string" },
                   relevanceScore: { type: "number" },
                   category: { type: "string", enum: ["重要新聞", "AI 新概念", "AI 名詞", "開發工具"] },
                   title: { type: "string" },
-                  summary: { type: "string" },
+                  summaryZh: { type: "string" },
+                  summaryEn: { type: "string" },
                   whyImportant: { type: "string" },
                   conceptExplanation: { type: ["string", "null"] }
                 }
