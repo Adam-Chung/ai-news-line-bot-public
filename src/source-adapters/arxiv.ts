@@ -1,24 +1,14 @@
 import { isAllowedByRobots } from "../robots.js";
 import { sourceHttpClient } from "../source-http.js";
+import { plainTextFromHtml } from "../html.js";
 
 export interface ArxivDateItem {
   url: string;
   publishedAt: string | null;
 }
 
-function plainText(html: string): string {
-  return html
-    .replace(/<script[\s\S]*?<\/script>/giu, " ")
-    .replace(/<style[\s\S]*?<\/style>/giu, " ")
-    .replace(/<[^>]*>/gu, " ")
-    .replace(/&nbsp;|&#160;/giu, " ")
-    .replace(/&amp;/giu, "&")
-    .replace(/\s+/gu, " ")
-    .trim();
-}
-
 export function extractArxivInitialSubmissionDate(html: string): string | null {
-  const content = plainText(html);
+  const content = plainTextFromHtml(html);
   const versionOne = content.match(
     /\[v1\]\s*((?:Mon|Tue|Wed|Thu|Fri|Sat|Sun),\s+\d{1,2}\s+[A-Z][a-z]{2}\s+\d{4}\s+\d{2}:\d{2}:\d{2}\s+UTC)/u
   )?.[1];

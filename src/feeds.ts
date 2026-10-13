@@ -16,6 +16,7 @@ import { fetchHackerNews, type HackerNewsItem } from "./source-adapters/hacker-n
 import { verifyArxivSubmissionDates } from "./source-adapters/arxiv.js";
 import { isAllowedByRobots } from "./robots.js";
 import { sourceHttpClient } from "./source-http.js";
+import { plainTextFromHtml } from "./html.js";
 
 const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: "@_" });
 const multiTenantHosts = new Set(["github.com"]);
@@ -87,31 +88,11 @@ function alternateLink(value: unknown): string {
   return "";
 }
 
-function stripHtml(value: string): string {
-  return value
-    .replace(/<script[\s\S]*?<\/script>/gi, " ")
-    .replace(/<style[\s\S]*?<\/style>/gi, " ")
-    .replace(/<[^>]*>/g, " ")
-    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim()
-    .slice(0, 600);
-}
-
-function decodeHtml(value: string): string {
-  return value
-    .replace(/&quot;/g, "\"")
-    .replace(/&#39;|&apos;/g, "'")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">");
-}
-
 function metaContent(html: string, property: string): string {
   const escaped = property.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const propertyFirst = new RegExp(`<meta[^>]+(?:property|name)=["']${escaped}["'][^>]+content=["']([^"']+)["']`, "i");
   const contentFirst = new RegExp(`<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["']${escaped}["']`, "i");
-  return decodeHtml(propertyFirst.exec(html)?.[1] ?? contentFirst.exec(html)?.[1] ?? "").trim();
+  return (propertyFirst.exec(html)?.[1] ?? contentFirst.exec(html)?.[1] ?? "").trim();
 }
 
 export function parseSyndication(xml: string, feed: FeedConfig): RawSourceItem[] {
@@ -120,7 +101,7 @@ export function parseSyndication(xml: string, feed: FeedConfig): RawSourceItem[]
 
   return asArray<Record<string, unknown>>(entries)
     .flatMap((entry) => {
-      const title = stripHtml(text(entry.title));
+      const title = plainTextFromHtml(text(entry.title), 600);
       const rawUrl = alternateLink(entry.link) || text(entry.guid).trim();
       if (!title || !rawUrl) return [];
 
@@ -129,7 +110,7 @@ export function parseSyndication(xml: string, feed: FeedConfig): RawSourceItem[]
       return [{
         title,
         url: canonicalizeUrl(rawUrl),
-        description: stripHtml(text(entry.description ?? entry.summary ?? entry.content)),
+        description: plainTextFromHtml(text(entry.description ?? entry.summary ?? entry.content), 600),
         publishedAt: parsedDate && !Number.isNaN(parsedDate.valueOf())
           ? parsedDate.toISOString()
           : null
@@ -168,9 +149,9 @@ async function parseSitemap(
     const published = metaContent(html, "article:published_time");
     const publishedDate = new Date(published);
     return {
-      title: stripHtml(title),
+      title: plainTextFromHtml(title, 600),
       url: canonicalizeUrl(entry.url),
-      description: stripHtml(metaContent(html, "og:description") || metaContent(html, "description")),
+      description: plainTextFromHtml(metaContent(html, "og:description") || metaContent(html, "description"), 600),
       publishedAt: published && !Number.isNaN(publishedDate.valueOf())
         ? publishedDate.toISOString()
         : null
@@ -190,11 +171,12 @@ async function fetchText(feed: FeedConfig): Promise<string> {
 
 function mapHackerNewsItems(items: HackerNewsItem[]): RawSourceItem[] {
   return items.map((item) => ({
-    title: stripHtml(item.title),
+    title: plainTextFromHtml(item.title, 600),
     url: item.url,
     discussionUrl: item.discussionUrl,
-    description: stripHtml(
-      item.description || "Discovered through Hacker News."
+    description: plainTextFromHtml(
+      item.description || "Discovered through Hacker News.",
+      600
     ),
     publishedAt: item.publishedAt,
     engagement: {
