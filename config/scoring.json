@@ -1,0 +1,483 @@
+{
+  "titleMultiplier": 1,
+  "descriptionMultiplier": 0.6,
+  "selection": {
+    "candidateLimit": 6,
+    "minContentScore": 25,
+    "fallbackCandidateLimit": 3,
+    "fallbackMinContentScore": 18,
+    "valueSlots": 4,
+    "primarySlots": 1,
+    "discoverySlots": 1,
+    "maxPerSource": 1,
+    "maxPerOrganization": 2,
+    "maxPerTopic": 2,
+    "sourceCooldownHours": 48,
+    "sourceCooldownBypassGroups": ["breaking-lifecycle", "security"]
+  },
+  "community": {
+    "highValueBypassScore": 25,
+    "discoveryCandidateLimit": 1,
+    "minPoints": 20,
+    "minComments": 8
+  },
+  "dimensions": {
+    "topic": {
+      "cap": 40,
+      "groups": [
+        {
+          "id": "coding-agents",
+          "weight": 14,
+          "phrases": [
+            "coding agent",
+            "ai coding agent",
+            "agentic coding",
+            "software engineering agent",
+            "code review agent",
+            "terminal agent",
+            "long-running agent",
+            "autonomous coding", "AI 程式代理", "AI 编程代理", "程式開發智能體", "编程智能体"
+          ]
+        },
+        {
+          "id": "agent-systems",
+          "weight": 10,
+          "phrases": [
+            "agent",
+            "agents",
+            "agentic",
+            "multi-agent",
+            "subagent",
+            "agent orchestration",
+            "computer use",
+            "browser automation",
+            "human-in-the-loop", "AI 代理", "智慧代理", "智能體", "智能体", "多代理", "多智能體", "多智能体"
+          ]
+        },
+        {
+          "id": "agent-protocols",
+          "weight": 10,
+          "phrases": [
+            "model context protocol",
+            "mcp",
+            "agent2agent",
+            "a2a",
+            "tool calling",
+            "function calling",
+            "structured output",
+            "json schema", "工具調用", "工具调用"
+          ]
+        },
+        {
+          "id": "retrieval",
+          "weight": 10,
+          "phrases": [
+            "rag",
+            "retrieval-augmented generation",
+            "retrieval augmented generation",
+            "vector database",
+            "vector store",
+            "embedding",
+            "reranking",
+            "hybrid search",
+            "semantic search",
+            "grounding", "檢索增強生成", "检索增强生成", "向量資料庫", "向量数据库", "語意搜尋", "语义搜索"
+          ]
+        },
+        {
+          "id": "llm-operations",
+          "weight": 10,
+          "phrases": [
+            "evals",
+            "evaluation",
+            "llm-as-a-judge",
+            "tracing",
+            "observability",
+            "guardrails",
+            "prompt injection",
+            "sandbox",
+            "red teaming",
+            "model routing",
+            "fallback model", "提示詞注入", "提示词注入", "模型路由", "防護欄", "护栏"
+          ]
+        },
+        {
+          "id": "context-engineering",
+          "weight": 8,
+          "phrases": [
+            "context engineering",
+            "context window",
+            "prompt caching",
+            "conversation memory", "上下文工程", "情境工程", "上下文視窗", "上下文窗口", "提示詞快取", "提示词缓存", "對話記憶", "对话记忆"
+          ]
+        },
+        {
+          "id": "ai-content-provenance",
+          "weight": 10,
+          "phrases": [
+            "watermark",
+            "content provenance",
+            "c2pa",
+            "ai-generated content",
+            "content labeling",
+            "content authenticity",
+            "deepfake detection",
+            "浮水印", "數位浮水印", "内容溯源", "內容溯源", "來源標記", "来源标记", "AI 生成內容標示", "AI 生成内容标示", "數位簽章", "数字签章"
+          ]
+        },
+        {
+          "id": "reasoning-models",
+          "weight": 10,
+          "phrases": [
+            "reasoning model",
+            "chain-of-thought",
+            "chain of thought",
+            "extended thinking",
+            "test-time compute",
+            "reasoning trace",
+            "thinking mode",
+            "推理模型", "思維鏈", "思维链", "延伸思考", "擴充思考", "測試時運算", "测试时计算", "思考模式"
+          ]
+        },
+        {
+          "id": "decision-models",
+          "weight": 10,
+          "phrases": [
+            "decision model",
+            "decision ai",
+            "classification model",
+            "classifier model",
+            "typed decision",
+            "type-constrained decision",
+            "決策模型",
+            "决策模型",
+            "判斷模型",
+            "判断模型",
+            "分類模型",
+            "分类模型",
+            "受型別限制",
+            "受类型限制",
+            "型別限制輸出",
+            "类型限制输出"
+          ]
+        },
+        {
+          "id": "ai-usage-tips",
+          "weight": 8,
+          "phrases": [
+            "prompt tips",
+            "how to use ai",
+            "ai workflow",
+            "ai productivity",
+            "use case",
+            "hands-on review",
+            "ai tutorial",
+            "使用心得", "應用技巧", "应用技巧", "生產力技巧", "生产力技巧", "實測", "实测", "上手教學", "上手教程", "AI 教學", "AI 教程", "心得分享"
+          ]
+        },
+        {
+          "id": "ai-product-launch",
+          "weight": 8,
+          "phrases": [
+            "ai product launch",
+            "ai service launch",
+            "ai assistant launch",
+            "ai app launch",
+            "new ai app",
+            "ai 助理上線", "AI 助理上线", "AI 服務上線", "AI 服务上线", "AI 應用程式", "AI 应用程序", "新產品上線", "新产品上线"
+          ]
+        },
+        {
+          "id": "multimodal-generation",
+          "weight": 10,
+          "phrases": [
+            "image generation",
+            "video generation",
+            "text-to-video",
+            "text-to-image",
+            "voice cloning",
+            "ai dubbing",
+            "multimodal model",
+            "speech synthesis",
+            "圖像生成", "图像生成", "影像生成", "影片生成", "视频生成", "文字轉影片", "文字转视频", "文字轉圖片", "文字转图片", "AI 配音", "多模態", "多模态"
+          ]
+        },
+        {
+          "id": "model-serving-infra",
+          "weight": 8,
+          "phrases": [
+            "inference optimization",
+            "model serving",
+            "vllm",
+            "edge deployment",
+            "gpu inference",
+            "inference engine",
+            "model deployment",
+            "local llm",
+            "local llms",
+            "local model",
+            "local models",
+            "open-weight model",
+            "open-weight models",
+            "open weight model",
+            "open weight models",
+            "quantization",
+            "quantized model",
+            "model quantization",
+            "fine-tuning",
+            "fine tuning",
+            "distillation",
+            "推論優化", "推理优化", "模型部署", "邊緣部署", "边缘部署", "推論引擎", "推理引擎", "本地模型", "開源模型", "开源模型", "開放權重模型", "开放权重模型", "模型量化", "模型微調", "模型微调", "模型蒸餾", "模型蒸馏", "推論服務", "推理服务"
+          ]
+        }
+      ]
+    },
+    "stack": {
+      "cap": 20,
+      "groups": [
+        {
+          "id": "java-spring",
+          "weight": 12,
+          "phrases": [
+            "java",
+            "spring ai",
+            "langchain4j",
+            "spring boot",
+            "maven",
+            "gradle",
+            "java sdk"
+          ]
+        },
+        {
+          "id": "azure-ai",
+          "weight": 10,
+          "phrases": [
+            "azure openai",
+            "microsoft foundry",
+            "azure ai foundry",
+            "azure ai search"
+          ]
+        },
+        {
+          "id": "typescript-node",
+          "weight": 7,
+          "phrases": [
+            "typescript",
+            "typescript sdk",
+            "javascript sdk",
+            "node.js",
+            "node.js sdk"
+          ]
+        },
+        {
+          "id": "data-platform",
+          "weight": 7,
+          "phrases": [
+            "postgresql",
+            "pgvector",
+            "sql agent"
+          ]
+        },
+        {
+          "id": "developer-tools",
+          "weight": 7,
+          "phrases": [
+            "responses api",
+            "agents sdk",
+            "codex",
+            "github copilot",
+            "claude code",
+            "claude api",
+            "gemini api",
+            "gemini cli",
+            "cursor",
+            "jetbrains ai",
+            "junie",
+            "hugging face",
+            "agent framework",
+            "microsoft agent framework",
+            "semantic kernel",
+            "ollama",
+            "amazon bedrock",
+            "sagemaker",
+            "nvidia nim",
+            "智能體框架",
+            "智能体框架"
+          ]
+        },
+        {
+          "id": "machine-consumable-output",
+          "weight": 7,
+          "phrases": [
+            "typed output",
+            "type-constrained output",
+            "probability output",
+            "probabilistic output",
+            "machine-consumable output",
+            "structured decision",
+            "型別安全輸出",
+            "类型安全输出",
+            "結構化輸出",
+            "结构化输出",
+            "機率輸出",
+            "概率输出",
+            "判斷與機率",
+            "判断与概率",
+            "分類路由",
+            "分类路由"
+          ]
+        }
+      ]
+    },
+    "impact": {
+      "cap": 20,
+      "groups": [
+        {
+          "id": "breaking-lifecycle",
+          "weight": 12,
+          "phrases": [
+            "breaking change",
+            "deprecation",
+            "deprecated",
+            "sunset",
+            "retirement",
+            "shutdown",
+            "migration", "重大變更", "重大变更", "棄用", "弃用", "停用", "終止服務", "终止服务", "遷移", "迁移"
+          ]
+        },
+        {
+          "id": "security",
+          "weight": 12,
+          "phrases": [
+            "security advisory",
+            "cyberattack",
+            "cybersecurity",
+            "supply chain attack",
+            "data exfiltration",
+            "vulnerability",
+            "cve", "資安公告", "资安公告", "漏洞", "供應鏈攻擊", "供应链攻击", "資料外洩", "数据泄露"
+          ]
+        },
+        {
+          "id": "availability",
+          "weight": 8,
+          "phrases": [
+            "general availability",
+            "release candidate",
+            "model availability",
+            "region availability", "正式發布", "正式发布", "正式版", "區域可用", "区域可用"
+          ]
+        },
+        {
+          "id": "product-release",
+          "weight": 10,
+          "phrases": [
+            "model release",
+            "new model",
+            "api release",
+            "sdk release",
+            "major release",
+            "new feature",
+            "feature launch",
+            "capability update",
+            "model update", "模型發布", "模型发布", "新模型", "API 發布", "API 发布", "重大版本", "新功能", "功能更新", "模型更新", "新版本", "新能力"
+          ]
+        },
+        {
+          "id": "cost-and-limits",
+          "weight": 8,
+          "phrases": [
+            "pricing",
+            "quota",
+            "rate limit",
+            "cost reduction",
+            "lower cost",
+            "low cost", "定價", "定价", "配額", "配额", "速率限制", "降低成本", "低成本"
+          ]
+        }
+      ]
+    },
+    "goal": {
+      "cap": 20,
+      "groups": [
+        {
+          "id": "production-reliability",
+          "weight": 10,
+          "phrases": [
+            "production ai",
+            "reliability",
+            "resilience",
+            "fault tolerance",
+            "graceful degradation", "正式環境 AI", "生产环境 AI", "可靠性", "韌性", "容錯", "容错", "優雅降級", "优雅降级"
+          ]
+        },
+        {
+          "id": "system-design",
+          "weight": 8,
+          "phrases": [
+            "system design",
+            "architecture",
+            "scalability",
+            "distributed system", "系統設計", "系统设计", "架構", "架构", "可擴展性", "可扩展性", "分散式系統", "分布式系统"
+          ]
+        },
+        {
+          "id": "engineering-practice",
+          "weight": 8,
+          "phrases": [
+            "best practice",
+            "implementation guide",
+            "tutorial",
+            "walkthrough",
+            "code example",
+            "sample project",
+            "reference implementation",
+            "lessons learned",
+            "postmortem",
+            "benchmark",
+            "latency",
+            "low latency", "最佳實務", "最佳实践", "實作指南", "实现指南", "教學", "教程", "程式碼範例", "代码示例", "參考實作", "参考实现", "經驗分享", "经验分享", "事後檢討", "事后复盘", "效能評測", "性能评测", "低延遲", "低延迟"
+          ]
+        }
+      ]
+    }
+  },
+  "negative": {
+    "cap": 30,
+    "groups": [
+      {
+        "id": "corporate-finance",
+        "weight": 15,
+        "phrases": [
+          "funding",
+          "investment",
+          "valuation",
+          "acquisition"
+        ]
+      },
+      {
+        "id": "corporate-promotion",
+        "weight": 12,
+        "phrases": [
+          "partnership",
+          "appointed",
+          "executive hire",
+          "celebrity",
+          "award"
+        ]
+      },
+      {
+        "id": "event-marketing",
+        "weight": 10,
+        "phrases": [
+          "event",
+          "keynote",
+          "webinar",
+          "survey",
+          "customer story",
+          "marketing announcement"
+        ]
+      }
+    ]
+  }
+}

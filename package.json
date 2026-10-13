@@ -1,0 +1,29 @@
+{
+  "name": "ai-news-line-bot",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "dry-run": "tsx src/index.ts --dry-run",
+    "preview:candidates": "tsx src/index.ts --preview-candidates",
+    "diagnose:url": "tsx src/diagnose-url.ts",
+    "smoke:sources": "tsx src/smoke-sources.ts",
+    "test-line": "tsx src/index.ts --test-line",
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "check": "npm run build && npm test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "fast-xml-parser": "^5.2.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.15",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  }
+}
