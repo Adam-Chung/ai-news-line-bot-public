@@ -1,0 +1,87 @@
+AI News LINE Bot Personal and Non-Commercial Source License 1.0
+
+Copyright (c) 2026 Adam Chung
+
+By exercising any permission granted below, you accept and agree to be bound
+by this License.
+
+1. Permission Grant
+
+"Software" means the software and accompanying documentation distributed
+with this License. Subject to the terms of this License, the copyright holder
+grants you a worldwide, royalty-free, non-exclusive license to view, copy,
+download, fork, modify, run, and self-host the Software solely for personal,
+educational, academic research, charitable, or other non-commercial purposes.
+
+You may create derivative works for those purposes. You may also make the
+Software available in a public GitHub fork or redistribute source copies,
+including modified source copies, only when all of the following conditions
+are met:
+
+- the use and redistribution remain entirely non-commercial;
+- this License and all copyright notices are retained;
+- modified files are clearly identified as modified;
+- recipients receive the corresponding source code under this same License;
+  and
+- you do not impose additional terms that restrict the permissions granted
+  by this License.
+
+2. Non-Commercial Use
+
+"Non-commercial" means use that is not intended for, connected to, or
+directed toward commercial advantage, business operations, or monetary
+compensation. Without prior written permission from the copyright holder,
+you may not use the Software or a derivative work:
+
+- in or for the operations of a for-profit business;
+- to provide a paid, subscription, hosted, consulting, or client service;
+- in a product or service that is sold, licensed, monetized, or supported by
+  advertising;
+- to obtain direct or indirect commercial advantage; or
+- in exchange for fees, revenue, or other compensation, except reimbursement
+  of reasonable physical media costs for an otherwise permitted source
+  distribution.
+
+If your intended use may be commercial, you must obtain separate written
+permission from the copyright holder before using the Software.
+
+3. Third-Party Materials and Services
+
+This License applies only to rights held by the copyright holder in the
+Software. It does not grant rights to third-party dependencies, trademarks,
+news articles, feeds, APIs, websites, models, or services. You are responsible
+for obtaining all permissions required for your data sources and use of
+Gemini, LINE, and any other third-party service.
+
+4. Attribution and Trademarks
+
+You must retain the copyright notice and this License in every permitted copy
+or substantial portion of the Software. No trademark, trade name, logo, or
+endorsement right is granted. You may not imply that the copyright holder
+endorses your fork, deployment, modification, or service.
+
+5. Termination
+
+Your rights under this License terminate automatically if you breach any
+condition. If the breach is curable, your rights are reinstated when you cure
+the breach within 30 days after discovering it. Termination does not limit any
+other remedy available to the copyright holder.
+
+6. Disclaimer of Warranty
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE, TITLE, AND NON-INFRINGEMENT. YOU BEAR ALL RISK
+ARISING FROM YOUR USE OF THE SOFTWARE.
+
+7. Limitation of Liability
+
+TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE COPYRIGHT HOLDER SHALL NOT BE
+LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT,
+OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR ITS
+USE.
+
+8. License Character
+
+This is a custom source-available license with a non-commercial restriction.
+It is not an Open Source license as defined by the Open Source Initiative.

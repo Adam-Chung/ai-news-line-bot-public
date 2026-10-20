@@ -4,6 +4,10 @@
 
 An example AI news filtering project with user-configurable sources and personal preferences. It reads RSS, Atom, sitemap, or supported API sources added by the user, applies local filtering rules, asks Gemini to generate Traditional Chinese and English summaries, and delivers the results to specified recipients through the LINE Push API.
 
+本專案採用自訂的個人與非商業 source-available License。你可以為個人、學習、研究及其他非商業目的下載、Fork、修改與自行部署；商業使用必須事先取得著作權人的書面許可。完整條款請參閱 [`LICENSE`](LICENSE)。
+
+This project uses a custom personal and non-commercial source-available License. You may download, fork, modify, and self-host it for personal, educational, research, and other non-commercial purposes. Commercial use requires prior written permission from the copyright holder. See [`LICENSE`](LICENSE) for the complete terms.
+
 > 本 Public Repository **不內建任何新聞來源**。`config/feeds.json` 預設為空陣列，不會主動存取任何第三方網站。使用者加入、啟用及運行來源前，必須自行完成授權與合規確認並承擔相應責任。
 >
 > This Public Repository **does not include any built-in news sources**. `config/feeds.json` is an empty array by default, so the project does not access any third-party website unless the user adds a source. Before adding, enabling, or running a source, users must verify authorization and compliance requirements and accept responsibility for their use.
@@ -143,6 +147,10 @@ npm ci
 npm run check
 ```
 
+完整的本機與 Private GitHub Actions 操作方式請參閱 [`docs/SELF_HOSTING.md`](docs/SELF_HOSTING.md)。
+
+For complete local and private GitHub Actions instructions, see [`docs/SELF_HOSTING.md`](docs/SELF_HOSTING.md).
+
 複製 `.env.example` 為本機環境設定，但不要提交 `.env`：
 
 Copy `.env.example` for local configuration, but do not commit `.env`:
@@ -260,9 +268,17 @@ Do not publish LINE user IDs. Even hashes or aliases can become long-term linkab
 
 ### License status
 
-除非 repository 中另有正式 `LICENSE` 文件，Public 可見不代表授予複製、修改、散布或商業使用權。Repository 擁有者應在發布前自行選擇並審閱適合的 License；第三方來源內容不會因本專案的 License 而取得額外授權。
+本專案採用 [`AI News LINE Bot Personal and Non-Commercial Source License 1.0`](LICENSE)。這是自訂的 source-available License，不是 Open Source Initiative 定義的 Open Source License。
 
-Unless the repository includes a formal `LICENSE` file, public visibility does not grant permission to copy, modify, distribute, or use the project commercially. The repository owner should independently select and review an appropriate License before release. Third-party source content does not gain additional permissions from this project's License.
+This project is licensed under the [`AI News LINE Bot Personal and Non-Commercial Source License 1.0`](LICENSE). It is a custom source-available License, not an Open Source License as defined by the Open Source Initiative.
+
+License 允許個人、教育、學術研究、慈善及其他非商業目的的使用、Fork、修改、自架與符合條件的原始碼再散布。禁止未經書面授權的商業營運、付費或訂閱服務、顧問／客戶服務、廣告變現，以及其他直接或間接商業利益用途。
+
+The License permits personal, educational, academic research, charitable, and other non-commercial use, forking, modification, self-hosting, and conditional source redistribution. Commercial operations, paid or subscription services, consulting or client services, advertising-supported use, and other direct or indirect commercial advantage require prior written permission.
+
+此 License 只涵蓋著作權人對本程式碼擁有的權利，不會替第三方 dependencies、新聞文章、feeds、API、網站、模型或服務提供額外授權。License 文字尚未取代必要的專業法律審閱。
+
+The License covers only rights held by the copyright holder in this code. It does not grant additional rights to third-party dependencies, news articles, feeds, APIs, websites, models, or services. The License text does not replace professional legal review where needed.
 
 ## Repository 政策
 
@@ -272,8 +288,10 @@ Unless the repository includes a formal `LICENSE` file, public visibility does n
   See [`SECURITY.md`](SECURITY.md) for private vulnerability reporting instructions.
 - 開發設定、修改原則與 Public mirror 貢獻流程請參閱 [`CONTRIBUTING.md`](CONTRIBUTING.md)。<br>
   See [`CONTRIBUTING.md`](CONTRIBUTING.md) for development setup, change guidelines, and the Public mirror contribution flow.
-- 本 repository 目前沒有 `LICENSE`；在 License 決策完成前，不應假設取得重用權。<br>
-  This repository currently has no `LICENSE`; do not assume reuse rights until a license decision is completed.
+- 自架流程與 Private GitHub Actions 排程範本請參閱 [`docs/SELF_HOSTING.md`](docs/SELF_HOSTING.md)。<br>
+  See [`docs/SELF_HOSTING.md`](docs/SELF_HOSTING.md) for self-hosting and the private GitHub Actions schedule template.
+- 所有使用、修改與散布都必須遵守 [`LICENSE`](LICENSE)。<br>
+  All use, modification, and distribution must comply with [`LICENSE`](LICENSE).
 
 ## 已知限制
 

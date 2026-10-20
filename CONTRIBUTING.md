@@ -72,3 +72,11 @@ Before opening a Pull Request, confirm that:
 接受 Public Pull Request 不代表程式碼會直接合併；maintainer 可能改以等效修改移植到 Private source of truth，以維持單向安全發布與 history 隔離。
 
 Acceptance of a Public Pull Request does not imply a direct merge. A maintainer may reimplement or migrate an equivalent change in the Private source of truth to preserve one-way sanitized publication and history isolation.
+
+## 貢獻授權
+
+### Contribution licensing
+
+本專案採用自訂的非商業 source-available [`LICENSE`](LICENSE)。提交 Issue 或 Pull Request 不會自動授予 maintainer 任意改用其他 License 的權利。在任何程式碼被移植或採用前，maintainer 可能要求 contributor 明確確認其擁有提交內容的權利，並同意該內容依本專案 License 發布。
+
+This project uses a custom non-commercial source-available [`LICENSE`](LICENSE). Opening an Issue or Pull Request does not automatically grant the maintainer unrestricted relicensing rights. Before code is migrated or accepted, the maintainer may require explicit confirmation that the contributor owns the submitted material and agrees to its distribution under the project License.
