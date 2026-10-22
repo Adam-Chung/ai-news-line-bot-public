@@ -10,6 +10,10 @@
 
 This project has not published a stable release. Only the latest code on `main` is maintained. Older commits, user-supplied source configurations, and user-created deployment workflows are outside the supported scope.
 
+本 repository 是從 Private source of truth 產生的 source-available public version，不是 Open Source 專案，也不是 deployment-ready security template。Public 匯出已移除 production state、正式來源、收件者資料、Secrets 與 production workflow；使用者仍必須針對自己的環境完成 Secret 管理、private state storage、存取控制、branch protection、log／artifact 保存政策與 incident response。
+
+This repository is a source-available public version generated from a Private source of truth. It is not an Open Source project and is not a deployment-ready security template. Production state, production sources, recipient data, secrets, and production workflows have been removed from the Public export. Users must still design secret management, private state storage, access control, branch protection, log and artifact retention, and incident response for their own environment.
+
 ## 私下回報弱點
 
 ### Reporting a vulnerability privately
@@ -38,6 +42,6 @@ If a Gemini API key, LINE access token, LINE user ID, Deploy Key, or another sec
 
 ### Security boundaries
 
-本 Public Repository 不包含預設新聞來源、production 排程、Secrets 或 delivery history。使用者自行加入來源或部署後，必須自行負責來源授權、Rate Limit、資料保存、存取控制與第三方服務設定。
+本 source-available public version 不包含預設新聞來源、production 排程、Secrets 或 delivery history，正式營運狀態已移除。使用者自行加入來源或部署後，必須自行負責來源授權、Rate Limit、資料保存、存取控制與第三方服務設定。
 
-This Public Repository does not include default news sources, production schedules, secrets, or delivery history. Users who add sources or deploy the project are responsible for source authorization, rate limits, data retention, access control, and third-party service configuration.
+This source-available public version does not include default news sources, production schedules, secrets, or delivery history. Production state has been removed. Users who add sources or deploy the project are responsible for source authorization, rate limits, data retention, access control, and third-party service configuration.

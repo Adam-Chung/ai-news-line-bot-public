@@ -1,26 +1,50 @@
-# 貢獻指南
+# 貢獻與回報政策
 
-## Contributing Guide
+## Contribution and feedback policy
 
-## 目前的貢獻模式
+## Private／Public 關係
 
-### Current contribution model
+### Private/Public relationship
 
-這個 repository 是由 Private production repository 單向產生的安全 Public mirror。Issue、錯誤回報與改進建議都歡迎提出；Public repository 的修改不會自動同步回 Private repository，下一次安全同步也可能覆蓋直接修改。
+本 repository 是由 Private source of truth 單向產生的 source-available public version。Public repository 不是獨立開發來源，且任何內容都不會自動同步回 Private repository。直接修改 Public repository 的同步範圍，可能在下一次安全發布時被覆蓋。
 
-This repository is a sanitized Public mirror generated one way from a Private production repository. Issues, bug reports, and improvement proposals are welcome. Changes made directly in the Public repository do not sync back automatically and may be overwritten by the next sanitized publication.
+This repository is a source-available public version generated one way from a Private source of truth. The Public repository is not an independent development source, and nothing is synchronized back into Private automatically. Direct changes within the generated Public scope may be overwritten by the next sanitized publication.
 
-在準備較大修改前，請先建立 Issue 說明問題、預期行為、建議方案與影響範圍。Maintainer 會判斷是否適合移植到 Private source of truth，再由安全同步流程發布。
+## 接受 Public Issues
 
-Before preparing a substantial change, open an Issue describing the problem, expected behavior, proposed approach, and affected scope. A maintainer will decide whether the change should be migrated to the Private source of truth and then published through the sanitized synchronization process.
+### Public Issues are accepted
 
-安全弱點請遵循 [`SECURITY.md`](SECURITY.md)，不要建立公開 Issue。
+歡迎透過 Public Issues 回報錯誤、提出功能建議、指出文件問題或說明可重現的使用情境。建立 Issue 時，請提供受影響的 commit 或版本、重現步驟、預期與實際結果、影響範圍，以及不含真實 Secret、個人資料或未授權第三方內容的最小證據。
 
-For security vulnerabilities, follow [`SECURITY.md`](SECURITY.md) instead of opening a public Issue.
+Public Issues are accepted for bug reports, feature suggestions, documentation corrections, and reproducible use cases. Include the affected commit or version, reproduction steps, expected and actual behavior, impact, and minimal evidence without real secrets, personal data, or unauthorized third-party content.
 
-## 開發設定
+安全弱點必須依照 [`SECURITY.md`](SECURITY.md) 私下回報，不要建立含有弱點細節的 Public Issue。
 
-### Development setup
+Report security vulnerabilities privately according to [`SECURITY.md`](SECURITY.md). Do not open a Public Issue containing vulnerability details.
+
+## 不直接接受 Public Pull Requests
+
+### Public Pull Requests are not accepted
+
+Public Pull Requests are not accepted as an upstream contribution path and may be closed without code review. 如果某項 Issue 建議被接受，repository owner 會在 Private repository 中自行評估並重新實作，再經 allowlist、verifier、tests 與單向發布流程重新產生 Public 版本。
+
+Public Pull Requests are not accepted as an upstream contribution path and may be closed without code review. When an Issue proposal is accepted, the repository owner independently evaluates and implements it in the Private repository, then regenerates the Public version through the allowlist, verifier, tests, and one-way publication workflow.
+
+此流程避免未受信任的 Public code、Git history、fixtures、Secrets 或 production assumptions 自動進入 Private production source。不得建立 Public → Private 的自動 pull、merge、cherry-pick 或 workflow dispatch。
+
+This process prevents untrusted Public code, Git history, fixtures, secrets, or production assumptions from entering the Private production source automatically. Do not create automated Public-to-Private pull, merge, cherry-pick, or workflow-dispatch paths.
+
+## Fork 與自用權利
+
+### Fork and self-hosting rights
+
+不直接接受 Pull Request 不會取消 [`LICENSE`](LICENSE) 授予的權利。你仍可依 License 為個人、學習、研究及其他非商業目的 Fork、修改、自架及符合條件地再散布原始碼；但你的 Fork 不會成為本專案的 upstream contribution source。
+
+The no-Pull-Request policy does not remove rights granted by [`LICENSE`](LICENSE). You may still fork, modify, self-host, and conditionally redistribute source code for personal, educational, research, and other non-commercial purposes under the License, but your fork does not become an upstream contribution source for this project.
+
+## 本機重現
+
+### Local reproduction
 
 需求：Node.js 20 以上。
 
@@ -31,52 +55,10 @@ npm ci
 npm run check
 ```
 
-不要在測試或範例中使用真實 Gemini key、LINE token、LINE userId、私人來源、內部 URL 或 production 資料。使用離線 fixture、`example.com` 與明確的假資料。
+不要在 Issue、測試或範例中使用真實 Gemini key、LINE token、LINE userId、私人來源、production URL 或 runtime data。請使用離線 fixture、`example.com` 與明確的假資料。
 
-Do not use real Gemini keys, LINE tokens, LINE user IDs, private sources, internal URLs, or production data in tests or examples. Use offline fixtures, `example.com`, and clearly synthetic values.
+Do not use real Gemini keys, LINE tokens, LINE user IDs, private sources, production URLs, or runtime data in Issues, tests, or examples. Use offline fixtures, `example.com`, and clearly synthetic values.
 
-## 修改原則
+自行維護 Fork 時，請保留 24 小時發布時間驗證、來源中立評分、Rate Limit、`Retry-After`、`robots.txt`、空白預設來源與 fail-closed 行為。
 
-### Change guidelines
-
-- 保持來源中立；不得因品牌或來源名稱直接增加內容分數。<br>
-  Keep scoring source-neutral; do not award relevance points directly for a brand or source name.
-- 新來源預設不得加入 Public 設定；使用者應自行新增並承擔授權與合規責任。<br>
-  Do not add enabled sources to the Public configuration; users must add and review their own sources.
-- 保留 24 小時發布時間驗證、Rate Limit、`Retry-After`、`robots.txt` 與 fail-closed 行為。<br>
-  Preserve the 24-hour publication-time validation, rate limits, `Retry-After`, `robots.txt`, and fail-closed behavior.
-- 行為變更必須新增或更新測試及相關 README。<br>
-  Behavioral changes must include updated tests and relevant README documentation.
-- 不要提交 `.env`、runtime `data/*.json`、build output、憑證或個人資料。<br>
-  Do not commit `.env`, runtime `data/*.json`, build output, credentials, or personal data.
-
-## Pull Request 檢查
-
-### Pull Request checklist
-
-提交 Pull Request 前，請確認：
-
-Before opening a Pull Request, confirm that:
-
-1. `npm run check` 已通過。<br>
-   `npm run check` passes.
-2. 測試不需要真實網路、Gemini 或 LINE 憑證。<br>
-   Tests do not require real network access, Gemini credentials, or LINE credentials.
-3. diff 不包含 Secret、個人資料、真實收件者或私人來源。<br>
-   The diff contains no secrets, personal data, real recipients, or private sources.
-4. commit message 使用清楚的英文，並保持每個 commit 範圍單一。<br>
-   Commit messages are clear English and each commit has a focused scope.
-5. README、`SECURITY.md` 或其他受影響文件已同步更新。<br>
-   README, `SECURITY.md`, and other affected documentation are updated.
-
-接受 Public Pull Request 不代表程式碼會直接合併；maintainer 可能改以等效修改移植到 Private source of truth，以維持單向安全發布與 history 隔離。
-
-Acceptance of a Public Pull Request does not imply a direct merge. A maintainer may reimplement or migrate an equivalent change in the Private source of truth to preserve one-way sanitized publication and history isolation.
-
-## 貢獻授權
-
-### Contribution licensing
-
-本專案採用自訂的非商業 source-available [`LICENSE`](LICENSE)。提交 Issue 或 Pull Request 不會自動授予 maintainer 任意改用其他 License 的權利。在任何程式碼被移植或採用前，maintainer 可能要求 contributor 明確確認其擁有提交內容的權利，並同意該內容依本專案 License 發布。
-
-This project uses a custom non-commercial source-available [`LICENSE`](LICENSE). Opening an Issue or Pull Request does not automatically grant the maintainer unrestricted relicensing rights. Before code is migrated or accepted, the maintainer may require explicit confirmation that the contributor owns the submitted material and agrees to its distribution under the project License.
+When maintaining your own fork, preserve the 24-hour publication-time validation, source-neutral scoring, rate limits, `Retry-After`, `robots.txt`, empty default source configuration, and fail-closed behavior.
