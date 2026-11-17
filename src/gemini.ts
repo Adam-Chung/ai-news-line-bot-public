@@ -1,7 +1,35 @@
-import type { CuratedDigest, CuratedItem, GeminiDecision, NewsCandidate, Profile } from "./types.js";
+import type {
+  CuratedDigest,
+  CuratedItem,
+  GeminiAttemptDiagnostic,
+  GeminiDecision,
+  NewsCandidate,
+  Profile
+} from "./types.js";
 
 const geminiRequestTimeoutMs = 120_000;
 const retryDelaysMs = [2_000, 5_000];
+const outputRetryDelayMs = 2_000;
+const maximumOutputAttemptsPerModel = 2;
+const retryableFinishReasons = new Set(["MAX_TOKENS", "MALFORMED_RESPONSE", "OTHER"]);
+
+class GeminiCurationError extends Error {
+  /** 建立包含安全嘗試紀錄的 Gemini 錯誤，供 fallback 與持久化診斷使用。 */
+  constructor(
+    message: string,
+    readonly attempts: GeminiAttemptDiagnostic[],
+    readonly fallbackEligible: boolean,
+    options?: ErrorOptions
+  ) {
+    super(message, options);
+    this.name = "GeminiCurationError";
+  }
+}
+
+/** 從 Gemini 錯誤安全取出模型嘗試摘要，不暴露原始回應或憑證。 */
+export function geminiAttemptsFromError(error: unknown): GeminiAttemptDiagnostic[] | undefined {
+  return error instanceof GeminiCurationError ? error.attempts : undefined;
+}
 
 function buildPrompt(profile: Profile, candidates: NewsCandidate[]): string {
   const candidatePayload = candidates.map((candidate) => ({
@@ -90,7 +118,27 @@ function sleep(milliseconds: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
-async function requestGemini(model: string, apiKey: string, body: unknown): Promise<Response> {
+/** 將錯誤縮短成適合診斷紀錄的安全文字。 */
+function safeErrorMessage(error: unknown): string {
+  return (error instanceof Error ? error.message : String(error)).slice(0, 200);
+}
+
+/** 保存並輸出不含 prompt、完整回應或 API Key 的 Gemini 嘗試摘要。 */
+function recordAttempt(
+  attempts: GeminiAttemptDiagnostic[],
+  attempt: GeminiAttemptDiagnostic
+): void {
+  attempts.push(attempt);
+  console.log(JSON.stringify({ geminiAttempt: attempt }));
+}
+
+/** 以有限次數處理 Gemini HTTP、timeout 與網路暫時錯誤。 */
+async function requestGemini(
+  model: string,
+  apiKey: string,
+  body: unknown,
+  attempts: GeminiAttemptDiagnostic[]
+): Promise<Response> {
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
   const totalAttempts = retryDelaysMs.length + 1;
   for (let attempt = 1; attempt <= totalAttempts; attempt += 1) {
@@ -101,11 +149,26 @@ async function requestGemini(model: string, apiKey: string, body: unknown): Prom
         body: JSON.stringify(body),
         signal: AbortSignal.timeout(geminiRequestTimeoutMs)
       });
-      if (response.ok || !isRetryableStatus(response.status) || attempt === totalAttempts) return response;
+      if (response.ok) return response;
+      recordAttempt(attempts, { model, outcome: "http-error", httpStatus: response.status });
+      if (!isRetryableStatus(response.status) || attempt === totalAttempts) return response;
       console.warn(`Gemini ${model} returned HTTP ${response.status}; retrying.`);
     } catch (error) {
-      if (!isTimeoutError(error) || attempt === totalAttempts) throw error;
-      console.warn(`Gemini ${model} request timed out; retrying.`);
+      const timeout = isTimeoutError(error);
+      recordAttempt(attempts, {
+        model,
+        outcome: timeout ? "timeout" : "network-error",
+        error: safeErrorMessage(error)
+      });
+      if (attempt === totalAttempts) {
+        throw new GeminiCurationError(
+          `Gemini ${model} ${timeout ? "timed out" : "network request failed"} after retries`,
+          attempts,
+          true,
+          { cause: error }
+        );
+      }
+      console.warn(`Gemini ${model} ${timeout ? "request timed out" : "network request failed"}; retrying.`);
     }
     await sleep(retryDelaysMs[attempt - 1] ?? 0);
   }
@@ -113,23 +176,182 @@ async function requestGemini(model: string, apiKey: string, body: unknown): Prom
   throw new Error("Gemini request failed without a response");
 }
 
-async function responseError(response: Response, model: string): Promise<Error> {
-  return new Error(`Gemini ${model} returned HTTP ${response.status}: ${(await response.text()).slice(0, 500)}`);
+/** 建立保留 HTTP 狀態但不包含憑證的 Gemini 回應錯誤。 */
+async function responseError(
+  response: Response,
+  model: string,
+  attempts: GeminiAttemptDiagnostic[]
+): Promise<GeminiCurationError> {
+  return new GeminiCurationError(
+    `Gemini ${model} returned HTTP ${response.status}: ${(await response.text()).slice(0, 500)}`,
+    attempts,
+    isRetryableStatus(response.status)
+  );
 }
 
+interface GeminiApiPayload {
+  candidates?: Array<{
+    finishReason?: string;
+    finishMessage?: string;
+    content?: { parts?: Array<{ text?: string }> };
+  }>;
+  usageMetadata?: {
+    candidatesTokenCount?: number;
+    thoughtsTokenCount?: number;
+    totalTokenCount?: number;
+  };
+}
+
+/** 從 Gemini API envelope 取得安全的結束原因與 token 統計。 */
+function attemptMetadata(model: string, payload: GeminiApiPayload): Omit<GeminiAttemptDiagnostic, "outcome"> {
+  const candidate = payload.candidates?.[0];
+  return {
+    model,
+    ...(candidate?.finishReason ? { finishReason: candidate.finishReason } : {}),
+    ...(typeof payload.usageMetadata?.candidatesTokenCount === "number"
+      ? { candidatesTokenCount: payload.usageMetadata.candidatesTokenCount }
+      : {}),
+    ...(typeof payload.usageMetadata?.thoughtsTokenCount === "number"
+      ? { thoughtsTokenCount: payload.usageMetadata.thoughtsTokenCount }
+      : {}),
+    ...(typeof payload.usageMetadata?.totalTokenCount === "number"
+      ? { totalTokenCount: payload.usageMetadata.totalTokenCount }
+      : {})
+  };
+}
+
+/** 驗證並轉換 structured output，未知 candidate ID 或不完整欄位仍會被排除。 */
+function parseDigest(
+  rawText: string,
+  candidates: NewsCandidate[]
+): Pick<CuratedDigest, "items" | "decisions"> {
+  const parsed = JSON.parse(rawText) as { items?: unknown[]; decisions?: unknown[] };
+  const candidateIds = new Set(candidates.map((item) => item.id));
+  const items = Array.isArray(parsed.items)
+    ? parsed.items.filter((item) => isCuratedItem(item, candidateIds)).slice(0, 2)
+    : [];
+  const selectedIds = new Set(items.map((item) => item.candidateId));
+  const returnedDecisions = new Map(
+    (Array.isArray(parsed.decisions) ? parsed.decisions : [])
+      .filter((decision) => isGeminiDecision(decision, candidateIds))
+      .map((decision) => [decision.candidateId, decision])
+  );
+  const decisions = candidates.map((candidate): GeminiDecision => {
+    const decision = returnedDecisions.get(candidate.id);
+    if (!decision) {
+      return {
+        candidateId: candidate.id,
+        relevanceScore: selectedIds.has(candidate.id)
+          ? items.find((item) => item.candidateId === candidate.id)?.relevanceScore ?? null
+          : null,
+        selected: selectedIds.has(candidate.id),
+        reason: "Gemini 未回傳此候選的個別判斷"
+      };
+    }
+    return { ...decision, selected: selectedIds.has(candidate.id) };
+  });
+  return { items, decisions };
+}
+
+/** 呼叫單一模型並對截斷、malformed envelope 或無效 JSON 進行一次有限重試。 */
+async function curateWithModel(
+  model: string,
+  apiKey: string,
+  requestBody: unknown,
+  candidates: NewsCandidate[],
+  attempts: GeminiAttemptDiagnostic[]
+): Promise<CuratedDigest> {
+  for (let outputAttempt = 1; outputAttempt <= maximumOutputAttemptsPerModel; outputAttempt += 1) {
+    const response = await requestGemini(model, apiKey, requestBody, attempts);
+    if (!response.ok) throw await responseError(response, model, attempts);
+
+    let payload: GeminiApiPayload;
+    try {
+      payload = await response.json() as GeminiApiPayload;
+    } catch (error) {
+      recordAttempt(attempts, {
+        model,
+        outcome: "invalid-output",
+        error: `Invalid API envelope: ${safeErrorMessage(error)}`
+      });
+      if (outputAttempt < maximumOutputAttemptsPerModel) {
+        console.warn(`Gemini ${model} returned an invalid API envelope; retrying.`);
+        await sleep(outputRetryDelayMs);
+        continue;
+      }
+      throw new GeminiCurationError(`Gemini ${model} returned an invalid API envelope`, attempts, true, { cause: error });
+    }
+
+    const metadata = attemptMetadata(model, payload);
+    const finishReason = payload.candidates?.[0]?.finishReason;
+    const rawText = payload.candidates?.[0]?.content?.parts
+      ?.map((part) => part.text)
+      .filter((text): text is string => typeof text === "string")
+      .join("");
+    const retryableFinish = finishReason ? retryableFinishReasons.has(finishReason) : false;
+    const unacceptableFinish = Boolean(finishReason && finishReason !== "STOP");
+
+    if (typeof rawText !== "string" || rawText.length === 0 || unacceptableFinish) {
+      const reason = unacceptableFinish
+        ? `finishReason=${finishReason}`
+        : "response did not contain text output";
+      recordAttempt(attempts, { ...metadata, outcome: "invalid-output", error: reason });
+      if (outputAttempt < maximumOutputAttemptsPerModel && (retryableFinish || !finishReason)) {
+        console.warn(`Gemini ${model} returned ${reason}; retrying.`);
+        await sleep(outputRetryDelayMs);
+        continue;
+      }
+      throw new GeminiCurationError(
+        `Gemini ${model} returned unusable structured output (${reason})`,
+        attempts,
+        retryableFinish || !finishReason
+      );
+    }
+
+    try {
+      const digest = parseDigest(rawText, candidates);
+      recordAttempt(attempts, { ...metadata, outcome: "success" });
+      return { ...digest, geminiAttempts: attempts };
+    } catch (error) {
+      recordAttempt(attempts, {
+        ...metadata,
+        outcome: "invalid-output",
+        error: `Invalid JSON: ${safeErrorMessage(error)}`
+      });
+      if (outputAttempt < maximumOutputAttemptsPerModel) {
+        console.warn(`Gemini ${model} returned invalid structured JSON; retrying.`);
+        await sleep(outputRetryDelayMs);
+        continue;
+      }
+      throw new GeminiCurationError(
+        `Gemini ${model} returned invalid structured JSON after retry: ${safeErrorMessage(error)}`,
+        attempts,
+        true,
+        { cause: error }
+      );
+    }
+  }
+
+  throw new GeminiCurationError(`Gemini ${model} failed without a usable response`, attempts, true);
+}
+
+/**
+ * 使用主要與備援 Gemini 模型整理候選文章；所有嘗試都失敗時拋出含安全診斷摘要的錯誤。
+ * 不會自行發送 LINE 或修改文章狀態，呼叫端必須決定失敗通知與持久化策略。
+ */
 export async function curateWithGemini(
   profile: Profile,
   candidates: NewsCandidate[],
   apiKey: string,
-  model = "gemini-3.5-flash",
-  fallbackModel = "gemini-3.1-flash-lite"
+  model = "gemini-3.8-flash",
+  fallbackModel = "gemini-3.6-flash"
 ): Promise<CuratedDigest> {
   if (candidates.length === 0) return { items: [], decisions: [] };
 
   const requestBody = {
       contents: [{ parts: [{ text: buildPrompt(profile, candidates) }] }],
       generationConfig: {
-        maxOutputTokens: 1500,
+        maxOutputTokens: 4096,
         thinkingConfig: { thinkingLevel: "low" },
         responseMimeType: "application/json",
         responseJsonSchema: {
@@ -174,53 +396,16 @@ export async function curateWithGemini(
       }
   };
 
-  let activeModel = model;
-  let response: Response;
+  const attempts: GeminiAttemptDiagnostic[] = [];
   try {
-    response = await requestGemini(model, apiKey, requestBody);
+    return await curateWithModel(model, apiKey, requestBody, candidates, attempts);
   } catch (error) {
-    if (!isTimeoutError(error) || fallbackModel === model) throw error;
-    console.warn(`Gemini ${model} timed out after retries; switching to ${fallbackModel}.`);
-    activeModel = fallbackModel;
-    response = await requestGemini(fallbackModel, apiKey, requestBody);
-  }
-
-  if (!response.ok && isRetryableStatus(response.status) && fallbackModel !== model) {
-    console.warn(`Gemini ${model} remained unavailable; switching to ${fallbackModel}.`);
-    activeModel = fallbackModel;
-    response = await requestGemini(fallbackModel, apiKey, requestBody);
-  }
-
-  if (!response.ok) {
-    throw await responseError(response, activeModel);
-  }
-
-  const payload = await response.json() as any;
-  const rawText = payload.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (typeof rawText !== "string") throw new Error("Gemini API response did not contain text output");
-
-  const parsed = JSON.parse(rawText) as { items?: unknown[]; decisions?: unknown[] };
-  const candidateIds = new Set(candidates.map((item) => item.id));
-  const items = Array.isArray(parsed.items) ? parsed.items.filter((item) => isCuratedItem(item, candidateIds)).slice(0, 2) : [];
-  const selectedIds = new Set(items.map((item) => item.candidateId));
-  const returnedDecisions = new Map(
-    (Array.isArray(parsed.decisions) ? parsed.decisions : [])
-      .filter((decision) => isGeminiDecision(decision, candidateIds))
-      .map((decision) => [decision.candidateId, decision])
-  );
-  const decisions = candidates.map((candidate): GeminiDecision => {
-    const decision = returnedDecisions.get(candidate.id);
-    if (!decision) {
-      return {
-        candidateId: candidate.id,
-        relevanceScore: selectedIds.has(candidate.id)
-          ? items.find((item) => item.candidateId === candidate.id)?.relevanceScore ?? null
-          : null,
-        selected: selectedIds.has(candidate.id),
-        reason: "Gemini 未回傳此候選的個別判斷"
-      };
+    if (!(error instanceof GeminiCurationError)
+      || !error.fallbackEligible
+      || fallbackModel === model) {
+      throw error;
     }
-    return { ...decision, selected: selectedIds.has(candidate.id) };
-  });
-  return { items, decisions };
+    console.warn(`Gemini ${model} remained unavailable or returned unusable output; switching to ${fallbackModel}.`);
+  }
+  return curateWithModel(fallbackModel, apiKey, requestBody, candidates, attempts);
 }

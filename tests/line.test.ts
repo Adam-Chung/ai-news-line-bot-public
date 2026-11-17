@@ -1,5 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { formatLineMessage, formatNoNewsMessage, sendLineMessage, sendLineMessageToRecipients } from "../src/line.js";
+import {
+  formatGeminiServiceErrorMessage,
+  formatLineMessage,
+  formatNoNewsMessage,
+  sendLineMessage,
+  sendLineMessageToRecipients
+} from "../src/line.js";
 import type { CuratedDigest, NewsCandidate } from "../src/types.js";
 import { makeCandidate } from "./helpers.js";
 
@@ -201,6 +207,20 @@ describe("formatLineMessage", () => {
 
     expect(result).toContain("社群探索放行：1 篇");
     expect(result).toContain("AI 主題不足 1 篇");
+  });
+
+  it("reports a Gemini service failure without claiming that no news qualified", () => {
+    const result = formatGeminiServiceErrorMessage(
+      3,
+      new Date("2026-11-17T09:20:56Z"),
+      "Example User"
+    );
+
+    expect(result).toContain("Example User 的今日 AI 情報");
+    expect(result).toContain("已找到 3 篇候選");
+    expect(result).toContain("Gemini 整理步驟未能完成");
+    expect(result).toContain("沒有被標記為已發送");
+    expect(result).not.toContain("沒有發現達到重要性門檻");
   });
 });
 

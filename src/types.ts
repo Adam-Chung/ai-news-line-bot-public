@@ -107,6 +107,18 @@ export interface CuratedItem {
 export interface CuratedDigest {
   items: CuratedItem[];
   decisions: GeminiDecision[];
+  geminiAttempts?: GeminiAttemptDiagnostic[];
+}
+
+export interface GeminiAttemptDiagnostic {
+  model: string;
+  outcome: "success" | "http-error" | "timeout" | "network-error" | "invalid-output";
+  httpStatus?: number;
+  finishReason?: string;
+  candidatesTokenCount?: number;
+  thoughtsTokenCount?: number;
+  totalTokenCount?: number;
+  error?: string;
 }
 
 export interface GeminiDecision {
@@ -137,7 +149,7 @@ export interface DeliveryRecord {
   recipientAlias: string;
   recipientHash: string;
   status: "sent" | "failed";
-  type: "news" | "no-news" | "test";
+  type: "news" | "no-news" | "service-error" | "test";
   message: string;
   urls: string[];
   sourceIds?: string[];
@@ -182,6 +194,7 @@ export interface RunDiagnostic {
     bypassSourceCooldown: boolean;
   }>;
   geminiDecisions: GeminiDecision[];
+  geminiAttempts?: GeminiAttemptDiagnostic[];
   /** 最近數次執行保留逐篇結果；較舊執行僅保存彙總，避免狀態檔無限制成長。 */
   evaluatedItems?: ArticleDiagnostic[];
   geminiError?: string;

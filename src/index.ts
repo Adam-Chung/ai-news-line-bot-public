@@ -1,8 +1,13 @@
 import { loadFeeds, loadProfile, loadRankingConfig, requireEnvironment } from "./config.js";
 import { attachGeminiDecisions, createRunDiagnostic, rejectionReason } from "./diagnostics.js";
 import { collectCandidatesDetailed } from "./feeds.js";
-import { curateWithGemini } from "./gemini.js";
-import { formatLineMessage, formatNoNewsMessage, sendLineMessageToRecipients } from "./line.js";
+import { curateWithGemini, geminiAttemptsFromError } from "./gemini.js";
+import {
+  formatGeminiServiceErrorMessage,
+  formatLineMessage,
+  formatNoNewsMessage,
+  sendLineMessageToRecipients
+} from "./line.js";
 import { loadRecipients } from "./recipients.js";
 import {
   hashRecipientId,
@@ -151,9 +156,29 @@ async function main(): Promise<void> {
       process.env.GEMINI_FALLBACK_MODEL
     );
     attachGeminiDecisions(diagnostic, digest.decisions);
+    diagnostic.geminiAttempts = digest.geminiAttempts;
   } catch (error) {
     diagnostic.geminiError = errorMessage(error);
-    if (!noDelivery) await recordRunDiagnostic(diagnostic);
+    diagnostic.geminiAttempts = geminiAttemptsFromError(error);
+    if (!noDelivery) {
+      await recordRunDiagnostic(diagnostic);
+      const serviceErrorMessage = formatGeminiServiceErrorMessage(candidates.length, new Date(), displayName);
+      const outcome = await deliverMessage(
+        serviceErrorMessage,
+        "service-error",
+        [],
+        lineToken!,
+        recipients,
+        []
+      );
+      if (outcome.failedAliases.length > 0) {
+        throw new Error(
+          `${errorMessage(error)}; LINE service-error delivery failed for: ${outcome.failedAliases.join(", ")}`,
+          { cause: error }
+        );
+      }
+      console.log(`Gemini curation failed. Sent a service status message to ${outcome.sentCount} recipient(s).`);
+    }
     throw error;
   }
   if (!noDelivery) await recordRunDiagnostic(diagnostic);

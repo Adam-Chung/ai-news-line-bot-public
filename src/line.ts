@@ -86,6 +86,20 @@ export function formatNoNewsMessage(
   return `🤖 ${displayName} 的今日 AI 情報｜${date}\n\n今天沒有發現達到重要性門檻的 AI 消息。\n\n📥 24 小時內有效內容：${diagnostics.validDateCount} 篇\n🔎 完成本地評分：${diagnostics.evaluatedCount} 篇\n🏅 當日最高本地分數：${highestScore}\n📊 ${diagnostics.fallbackThreshold} 分以上內容：${localEligibility.scoredAtOrAboveFallback} 篇\n✅ 通過資格檢查：${localEligibility.passedHardGates} 篇${communityDiscovery}\n🚫 淘汰原因：${formatLocalRejections(localEligibility)}\n📤 送交 Gemini：${geminiStatus}\n🎯 本地門檻：一般 ${diagnostics.normalThreshold} 分；0 篇時保底 ${diagnostics.fallbackThreshold} 分\n\n系統維持寧缺勿濫，明天再繼續幫你留意。`;
 }
 
+/** Gemini 無法完成整理時，產生不洩漏內部錯誤內容的每日狀態訊息。 */
+export function formatGeminiServiceErrorMessage(
+  candidateCount: number,
+  now = new Date(),
+  displayName = "使用者"
+): string {
+  const date = new Intl.DateTimeFormat("zh-TW", {
+    timeZone: "Asia/Taipei",
+    month: "numeric",
+    day: "numeric"
+  }).format(now);
+  return `🤖 ${displayName} 的今日 AI 情報｜${date}\n\n⚠️ 今天已找到 ${candidateCount} 篇候選，但 Gemini 整理步驟未能完成，因此沒有產生新聞摘要。\n\n候選文章沒有被標記為已發送，之後執行時仍可再次評估。系統已保存不含憑證與完整模型回應的診斷資訊。`;
+}
+
 export async function sendLineMessage(message: string, token: string, targetId: string): Promise<void> {
   if (!targetId.trim()) throw new Error("LINE_TARGET_ID is required; broadcast delivery is disabled");
   const response = await fetch("https://api.line.me/v2/bot/message/push", {

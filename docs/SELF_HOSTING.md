@@ -40,8 +40,8 @@ This guide explains how to run AI News LINE Bot on your own computer or from a p
 
    ```text
    GEMINI_API_KEY=...
-   GEMINI_MODEL=gemini-3.5-flash
-   GEMINI_FALLBACK_MODEL=gemini-3.1-flash-lite
+   GEMINI_MODEL=gemini-3.8-flash
+   GEMINI_FALLBACK_MODEL=gemini-3.6-flash
    LINE_CHANNEL_ACCESS_TOKEN=...
    LINE_TARGET_ID_001=...
    SOURCE_USER_AGENT=AI-News-Line-Bot/0.4 (+https://your-public-contact.example; personal digest)
@@ -69,6 +69,10 @@ This guide explains how to run AI News LINE Bot on your own computer or from a p
 `npm run dry-run` 會呼叫 Gemini，但不會傳送 LINE。`npm start` 會呼叫 Gemini 並傳送 LINE。
 
 `npm run dry-run` calls Gemini without sending LINE. `npm start` calls Gemini and sends LINE messages.
+
+預設模型名稱是文件撰寫當下支援 Standard Free Tier 的 stable 模型。Gemini 的 model lifecycle、免費額度與使用條款可能改變；部署前及定期運行期間都應重新核對官方文件。若 Gemini 無法產生有效 structured output，完整流程會傳送不含內部錯誤細節的服務狀態訊息，保留候選文章為未發送，並讓 workflow 保持失敗以便追蹤。
+
+The default model names are stable models that support the Standard Free Tier at the time of writing. Gemini model lifecycles, free-tier limits, and terms may change; recheck the official documentation before deployment and periodically during operation. If Gemini cannot produce valid structured output, the complete pipeline sends a service-status message without internal error details, leaves candidate articles unsent, and keeps the workflow failed for operational visibility.
 
 ## 使用 GitHub Actions 排程
 

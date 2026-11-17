@@ -39,8 +39,8 @@ jobs:
         run: npm start
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GEMINI_MODEL: gemini-3.5-flash
-          GEMINI_FALLBACK_MODEL: gemini-3.1-flash-lite
+          GEMINI_MODEL: gemini-3.8-flash
+          GEMINI_FALLBACK_MODEL: gemini-3.6-flash
           LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
           LINE_TARGET_ID_001: ${{ secrets.LINE_TARGET_ID_001 }}
           SOURCE_USER_AGENT: ${{ vars.SOURCE_USER_AGENT }}
