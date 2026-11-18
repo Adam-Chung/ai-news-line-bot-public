@@ -237,13 +237,13 @@ Do not place internal company data, private prompts, credentials, or personal da
 
 ### Gemini resilience
 
-預設使用 `gemini-3.8-flash`，並以 `gemini-3.6-flash` 備援；兩者在文件更新當下都是 stable 且支援 Standard Free Tier。系統會有限次重試暫時性 HTTP／網路錯誤，以及被截斷或無效的 structured JSON。若所有模型都失敗，完整執行仍會傳送服務狀態訊息，但不會把候選文章標記為已發送。
+預設依序使用 `gemini-3.8-flash`、`gemini-3.6-flash`、`gemini-3.5-flash-lite`；三者在文件更新當下都是 stable 且支援 Standard Free Tier。系統會有限次重試暫時性 HTTP／網路錯誤，以及被截斷或無效的 structured JSON，再依序切換模型。若所有模型都失敗，完整執行仍會傳送服務狀態訊息，但不會把候選文章標記為已發送。
 
-The defaults are `gemini-3.8-flash` with `gemini-3.6-flash` as fallback; both are stable and support the Standard Free Tier at the time of writing. The system performs bounded retries for transient HTTP or network failures and for truncated or invalid structured JSON. If every model fails, a complete run still sends a service-status message without marking candidate articles as delivered.
+The default chain is `gemini-3.8-flash`, `gemini-3.6-flash`, and `gemini-3.5-flash-lite`; all three are stable and support the Standard Free Tier at the time of writing. The system performs bounded retries for transient HTTP or network failures and for truncated or invalid structured JSON before moving to the next model. If every model fails, a complete run still sends a service-status message without marking candidate articles as delivered.
 
-Gemini 的 model lifecycle、免費額度與服務條款可能改變。部署者應定期核對官方文件，並可透過 `GEMINI_MODEL`、`GEMINI_FALLBACK_MODEL` 覆寫模型，不應依賴 deprecated 名稱的自動轉送。
+Gemini 的 model lifecycle、免費額度與服務條款可能改變。部署者應定期核對官方文件，並可透過 `GEMINI_MODEL`、`GEMINI_FALLBACK_MODEL`、`GEMINI_SECOND_FALLBACK_MODEL` 覆寫模型。
 
-Gemini model lifecycles, free-tier limits, and terms may change. Operators should recheck the official documentation regularly and may override the models with `GEMINI_MODEL` and `GEMINI_FALLBACK_MODEL` instead of relying on automatic routing from deprecated names.
+Gemini model lifecycles, free-tier limits, and terms may change. Operators should recheck the official documentation regularly and may override the models with `GEMINI_MODEL`, `GEMINI_FALLBACK_MODEL`, and `GEMINI_SECOND_FALLBACK_MODEL`.
 
 ## 部署注意事項
 

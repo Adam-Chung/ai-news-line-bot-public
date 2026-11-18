@@ -336,7 +336,7 @@ async function curateWithModel(
 }
 
 /**
- * 使用主要與備援 Gemini 模型整理候選文章；所有嘗試都失敗時拋出含安全診斷摘要的錯誤。
+ * 依序使用主要與兩層備援 Gemini 模型整理候選文章；所有嘗試都失敗時拋出含安全診斷摘要的錯誤。
  * 不會自行發送 LINE 或修改文章狀態，呼叫端必須決定失敗通知與持久化策略。
  */
 export async function curateWithGemini(
@@ -344,7 +344,8 @@ export async function curateWithGemini(
   candidates: NewsCandidate[],
   apiKey: string,
   model = "gemini-3.8-flash",
-  fallbackModel = "gemini-3.6-flash"
+  fallbackModel = "gemini-3.6-flash",
+  secondFallbackModel = "gemini-3.5-flash-lite"
 ): Promise<CuratedDigest> {
   if (candidates.length === 0) return { items: [], decisions: [] };
 
@@ -397,15 +398,22 @@ export async function curateWithGemini(
   };
 
   const attempts: GeminiAttemptDiagnostic[] = [];
-  try {
-    return await curateWithModel(model, apiKey, requestBody, candidates, attempts);
-  } catch (error) {
-    if (!(error instanceof GeminiCurationError)
-      || !error.fallbackEligible
-      || fallbackModel === model) {
-      throw error;
+  const models = [...new Set([model, fallbackModel, secondFallbackModel])];
+  for (let modelIndex = 0; modelIndex < models.length; modelIndex += 1) {
+    const activeModel = models[modelIndex]!;
+    try {
+      return await curateWithModel(activeModel, apiKey, requestBody, candidates, attempts);
+    } catch (error) {
+      const nextModel = models[modelIndex + 1];
+      if (!(error instanceof GeminiCurationError)
+        || !error.fallbackEligible
+        || !nextModel) {
+        throw error;
+      }
+      console.warn(
+        `Gemini ${activeModel} remained unavailable or returned unusable output; switching to ${nextModel}.`
+      );
     }
-    console.warn(`Gemini ${model} remained unavailable or returned unusable output; switching to ${fallbackModel}.`);
   }
-  return curateWithModel(fallbackModel, apiKey, requestBody, candidates, attempts);
+  throw new GeminiCurationError("Gemini model chain ended without a usable response", attempts, false);
 }

@@ -153,7 +153,8 @@ async function main(): Promise<void> {
       candidates,
       geminiApiKey,
       process.env.GEMINI_MODEL,
-      process.env.GEMINI_FALLBACK_MODEL
+      process.env.GEMINI_FALLBACK_MODEL,
+      process.env.GEMINI_SECOND_FALLBACK_MODEL
     );
     attachGeminiDecisions(diagnostic, digest.decisions);
     diagnostic.geminiAttempts = digest.geminiAttempts;

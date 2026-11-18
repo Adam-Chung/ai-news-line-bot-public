@@ -111,6 +111,34 @@ describe("curateWithGemini", () => {
     expect(String(fetchMock.mock.calls[3]?.[0])).toContain("gemini-fallback");
   });
 
+  it("uses the default Flash-Lite fallback after both Flash models remain overloaded", async () => {
+    vi.useFakeTimers();
+    const successBody = {
+      candidates: [{ content: { parts: [{ text: JSON.stringify({ decisions: [], items: [] }) }] } }]
+    };
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response("busy", { status: 503 }))
+      .mockResolvedValueOnce(new Response("busy", { status: 503 }))
+      .mockResolvedValueOnce(new Response("busy", { status: 503 }))
+      .mockResolvedValueOnce(new Response("busy", { status: 503 }))
+      .mockResolvedValueOnce(new Response("busy", { status: 503 }))
+      .mockResolvedValueOnce(new Response("busy", { status: 503 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify(successBody), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    vi.spyOn(console, "log").mockImplementation(() => undefined);
+
+    const resultPromise = curateWithGemini(profile, candidates, "test-key");
+    await vi.runAllTimersAsync();
+    const result = await resultPromise;
+
+    expect(result.items).toEqual([]);
+    expect(fetchMock).toHaveBeenCalledTimes(7);
+    expect(String(fetchMock.mock.calls[0]?.[0])).toContain("gemini-3.8-flash");
+    expect(String(fetchMock.mock.calls[3]?.[0])).toContain("gemini-3.6-flash");
+    expect(String(fetchMock.mock.calls[6]?.[0])).toContain("gemini-3.5-flash-lite");
+  });
+
   it("retries truncated structured output before switching to the fallback model", async () => {
     vi.useFakeTimers();
     const truncatedBody = {
@@ -199,7 +227,7 @@ describe("curateWithGemini", () => {
     expect(String(fetchMock.mock.calls[0]?.[0])).toContain("gemini-3.8-flash");
   });
 
-  it("preserves safe attempt diagnostics when both models return invalid JSON", async () => {
+  it("preserves safe attempt diagnostics when all three models return invalid JSON", async () => {
     vi.useFakeTimers();
     const invalidBody = {
       candidates: [{
@@ -220,18 +248,26 @@ describe("curateWithGemini", () => {
       candidates,
       "test-key",
       "gemini-primary",
-      "gemini-fallback"
+      "gemini-first-fallback",
+      "gemini-second-fallback"
     ).catch((error: unknown) => error);
     await vi.runAllTimersAsync();
     const error = await resultPromise;
 
-    expect(fetchMock).toHaveBeenCalledTimes(4);
+    expect(fetchMock).toHaveBeenCalledTimes(6);
     expect(geminiAttemptsFromError(error)).toEqual([
       expect.objectContaining({ model: "gemini-primary", outcome: "invalid-output" }),
       expect.objectContaining({ model: "gemini-primary", outcome: "invalid-output" }),
-      expect.objectContaining({ model: "gemini-fallback", outcome: "invalid-output" }),
+      expect.objectContaining({ model: "gemini-first-fallback", outcome: "invalid-output" }),
       expect.objectContaining({
-        model: "gemini-fallback",
+        model: "gemini-first-fallback",
+        outcome: "invalid-output",
+        thoughtsTokenCount: 50,
+        totalTokenCount: 75
+      }),
+      expect.objectContaining({ model: "gemini-second-fallback", outcome: "invalid-output" }),
+      expect.objectContaining({
+        model: "gemini-second-fallback",
         outcome: "invalid-output",
         thoughtsTokenCount: 50,
         totalTokenCount: 75
